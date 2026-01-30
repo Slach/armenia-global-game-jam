@@ -1,0 +1,20 @@
+[project]
+name = "armenia-game-jam"
+version = "0.1.0"
+description = "Combination of PipeDream and PyTrek for Armenia Global Game Jam"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "pipedream-fiction @ git+https://github.com/CPritch/PipeDream.git",
+    "pytrek-9000",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["armenia_game_jam"]
