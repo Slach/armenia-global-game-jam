@@ -299,11 +299,14 @@ build_apps() {
     
     print_status "Building pypedream-gui..."
 
-    # Find pipedream module entry point
-    PYPEDREAM_MAIN=$(find .venv/Lib/site-packages -path "*/pipedream/__main__.py" -type f | head -1)
-    if [[ -z "$PYPEDREAM_MAIN" ]]; then
-        PYPEDREAM_MAIN=$(find .venv/lib/python*/site-packages -path "*/pipedream/__main__.py" -type f | head -1)
-    fi
+    # Find pipedream module entry point (check directories exist before find)
+    PYPEDREAM_MAIN=""
+    for dir in .venv/lib/python*/site-packages .venv/Lib/site-packages; do
+        if [[ -d "$dir" ]]; then
+            PYPEDREAM_MAIN=$(find "$dir" -path "*/pipedream/__main__.py" -type f 2>/dev/null | head -1)
+            [[ -n "$PYPEDREAM_MAIN" ]] && break
+        fi
+    done
 
     if [[ -z "$PYPEDREAM_MAIN" ]]; then
         print_error "Could not find pipedream/__main__.py"
