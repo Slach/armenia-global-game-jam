@@ -298,18 +298,35 @@ build_apps() {
         pytrek_cli.py
     
     print_status "Building pypedream-gui..."
+    print_status "Searching for pipedream module..."
+
+    # Check if pipedream package exists
+    if [[ -d ".venv/lib/python3.12/site-packages/pipedream" ]]; then
+        print_status "Found pipedream package at: .venv/lib/python3.12/site-packages/pipedream"
+        ls -la ".venv/lib/python3.12/site-packages/pipedream/" || true
+    fi
+    if [[ -d ".venv/lib/python*/site-packages/pipedream" ]]; then
+        print_status "Found pipedream package at: .venv/lib/python*/site-packages/pipedream"
+        ls -la .venv/lib/python*/site-packages/pipedream/ || true
+    fi
 
     # Find pipedream module entry point (check directories exist before find)
     PYPEDREAM_MAIN=""
     for dir in .venv/lib/python*/site-packages .venv/Lib/site-packages; do
         if [[ -d "$dir" ]]; then
+            print_status "Searching in: $dir"
             PYPEDREAM_MAIN=$(find "$dir" -path "*/pipedream/__main__.py" -type f 2>/dev/null | head -1)
+            print_status "Found: $PYPEDREAM_MAIN"
             [[ -n "$PYPEDREAM_MAIN" ]] && break
+        else
+            print_status "Directory does not exist: $dir"
         fi
     done
 
     if [[ -z "$PYPEDREAM_MAIN" ]]; then
         print_error "Could not find pipedream/__main__.py"
+        print_status "Looking for pipedream entry point in .venv/bin..."
+        ls -la .venv/bin/ | grep -i pipe || true
         return 1
     fi
 
