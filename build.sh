@@ -314,11 +314,11 @@ build_apps() {
     
     print_status "Found pypedream-gui at: $PYPEDREAM_SCRIPT"
     
-    # Copy the script to a temporary location for PyInstaller
-    cp "$PYPEDREAM_SCRIPT" "${TEMP_DIR}/pypedream-gui"
-    chmod +x "${TEMP_DIR}/pypedream-gui"
+    PYPEDREAM_TEMP_NAME=$(basename "$PYPEDREAM_SCRIPT")
+    cp "$PYPEDREAM_SCRIPT" "${TEMP_DIR}/${PYPEDREAM_TEMP_NAME}"
+    chmod +x "${TEMP_DIR}/${PYPEDREAM_TEMP_NAME}"
 
-    PYPEDREAM_ABS_PATH="$(pwd)/${TEMP_DIR}/pypedream-gui"
+    PYPEDREAM_ABS_PATH="$(pwd)/${TEMP_DIR}/${PYPEDREAM_TEMP_NAME}"
 
     # Build GUI application
     pyinstaller \
