@@ -297,39 +297,31 @@ build_apps() {
         --specpath="${TEMP_DIR}/specs" \
         pytrek_cli.py
     
-    # Build pypedream-gui (find the actual entry point)
     print_status "Building pypedream-gui..."
-    
-    # Find pypedream-gui script
-    PYPEDREAM_SCRIPT=$(find .venv -name "pypedream-gui" -type f | head -1)
-    if [[ -z "$PYPEDREAM_SCRIPT" ]]; then
-        # Try finding pipedream GUI
-        PYPEDREAM_SCRIPT=$(find .venv -name "*pipedream*" -name "*gui*" -type f | head -1)
+
+    # Find pipedream module entry point
+    PYPEDREAM_MAIN=$(find .venv/Lib/site-packages -path "*/pipedream/__main__.py" -type f | head -1)
+    if [[ -z "$PYPEDREAM_MAIN" ]]; then
+        PYPEDREAM_MAIN=$(find .venv/lib/python*/site-packages -path "*/pipedream/__main__.py" -type f | head -1)
     fi
-    
-    if [[ -z "$PYPEDREAM_SCRIPT" ]]; then
-        print_error "Could not find pypedream-gui script"
+
+    if [[ -z "$PYPEDREAM_MAIN" ]]; then
+        print_error "Could not find pipedream/__main__.py"
         return 1
     fi
-    
-    print_status "Found pypedream-gui at: $PYPEDREAM_SCRIPT"
-    
-    PYPEDREAM_TEMP_NAME=$(basename "$PYPEDREAM_SCRIPT")
-    cp "$PYPEDREAM_SCRIPT" "${TEMP_DIR}/${PYPEDREAM_TEMP_NAME}"
-    chmod +x "${TEMP_DIR}/${PYPEDREAM_TEMP_NAME}"
 
-    PYPEDREAM_ABS_PATH="$(pwd)/${TEMP_DIR}/${PYPEDREAM_TEMP_NAME}"
+    print_status "Found pipedream at: $PYPEDREAM_MAIN"
 
-    # Build GUI application
+    # Build GUI application using Python module entry point
     pyinstaller \
         --name="pypedream-gui" \
         --onefile \
         --windowed \
-        --add-data="${PYPEDREAM_ABS_PATH}:." \
         --distpath="${TEMP_DIR}/apps" \
         --workpath="${TEMP_DIR}/build" \
         --specpath="${TEMP_DIR}/specs" \
-        "${PYPEDREAM_ABS_PATH}"
+        --hidden-import=pipedream \
+        "$PYPEDREAM_MAIN"
 }
 
 # Function to create unified binary
