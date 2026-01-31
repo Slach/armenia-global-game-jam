@@ -1,0 +1,82 @@
+name: Build Cross-Platform Binaries
+
+on:
+  push:
+    branches: [ main, master ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v6
+      with:
+        python-version: '3.12'
+        
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        
+    - name: Set up build environment
+      run: |
+        # Install system dependencies
+        case "${{ runner.os }}" in
+          macOS)
+            # Install create-dmg for macOS
+            brew install create-dmg
+            ;;
+          Linux)
+            # Install Linux build dependencies
+            sudo apt-get update
+            sudo apt-get install -y build-essential
+            ;;
+          Windows)
+            # Windows already has required tools
+            ;;
+        esac
+        
+    - name: Build application
+      run: |
+        # Make build script executable
+        chmod +x build.sh
+        
+        # Build for current platform
+        ./build.sh
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.os }}-binaries
+        path: |
+          dist/*.dmg
+          dist/*.exe
+          dist/*.tar.gz
+          dist/armenian_global_game_jam*
+        retention-days: 1
+        
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          dist/*.dmg
+          dist/*.exe
+          dist/*.tar.gz
+          dist/armenian_global_game_jam*
+        draft: true
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

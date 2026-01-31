@@ -5,3 +5,5 @@ __pycache__/
 .claude/
 .opencode/
 .aider*
+games/
+dist/
