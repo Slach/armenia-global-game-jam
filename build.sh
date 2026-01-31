@@ -80,7 +80,7 @@ install_dependencies() {
     
     print_status "Creating virtual environment..."
     uv venv
-    source .venv/bin/activate
+    source .venv/bin/activate 2>/dev/null || source .venv/Scripts/activate
     
     # Install dependencies
     print_status "Installing project dependencies..."
